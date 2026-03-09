@@ -1,1 +1,1 @@
-# virtualAI
+1. kaukulačka, která bude sčítat, odčítat, dělit a násobit
