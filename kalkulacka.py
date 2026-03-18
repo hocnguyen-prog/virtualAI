@@ -1,11 +1,7 @@
 # kalkulačka
 
 def kalkulacka():
-    print("kalkulačka")
-    print("1. Sčítání")
-    print("2. Odčítání")
-    print("3. Násobení")
-    print("4. Dělení")
+    print(f"kalkulačka\n1. Sčítání\n2. Odčítání\n3. Násobení\n4. Dělení")
     volba = input("Vyberte operaci (1/2/3/4): ")
 
     try:
