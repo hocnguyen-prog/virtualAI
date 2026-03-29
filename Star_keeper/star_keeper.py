@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import pygame
 import random
 
@@ -78,7 +78,6 @@ while running:
 
     pygame.display.update()
 
-=======
 import pygame
 import random
 
@@ -158,5 +157,4 @@ while running:
 
     pygame.display.update()
 
->>>>>>> 9e7ab7b3ef6df452d38f6e299e8638294bc4098e
 pygame.quit()

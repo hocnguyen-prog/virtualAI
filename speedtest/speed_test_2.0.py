@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import tkinter as tk
 from tkinter import ttk
 import speedtest
@@ -81,7 +81,7 @@ btn_graph = tk.Button(app, text="📈 Zobrazit graf", command=show_graph)
 btn_graph.pack(pady=10)
 btn_save = tk.Button(app, text="💾 Uložit výsledky", command=save_results)
 btn_save.pack(pady=10)
-=======
+
 import tkinter as tk
 from tkinter import ttk
 import speedtest
@@ -164,5 +164,5 @@ btn_graph = tk.Button(app, text="📈 Zobrazit graf", command=show_graph)
 btn_graph.pack(pady=10)
 btn_save = tk.Button(app, text="💾 Uložit výsledky", command=save_results)
 btn_save.pack(pady=10)
->>>>>>> 9e7ab7b3ef6df452d38f6e299e8638294bc4098e
+
 app.mainloop()

@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # snake game example using pygame
 import pygame
 import random
@@ -188,7 +188,6 @@ while True:
     pygame.display.flip()
     clock.tick(snake_speed)
 
-=======
 # snake game example using pygame
 import pygame
 import random
@@ -377,5 +376,4 @@ while True:
 
     pygame.display.flip()
     clock.tick(snake_speed)
-
->>>>>>> 9e7ab7b3ef6df452d38f6e299e8638294bc4098e
+    
