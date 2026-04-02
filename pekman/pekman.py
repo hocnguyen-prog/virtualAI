@@ -1,227 +1,168 @@
 import pygame
-import sys
 import random
-import math   # ← přidáno pro radians
 
-pygame.init()
+# --- KONFIGURACE ---
+SIZE = 25  # Velikost jednoho čtverce
+FPS = 8    # Pomalejší rychlost, aby se to dalo hrát i bez plynulého pohybu
+
+MAZE = [
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "X............XX............X",
+    "X.XXXX.XXXXX.XX.XXXXX.XXXX.X",
+    "X.X  X.X   X.XX.X   X.X  X.X",
+    "X.XXXX.XXXXX.XX.XXXXX.XXXX.X",
+    "X..........................X",
+    "X.XXXX.XX.XXXXXXXX.XX.XXXX.X",
+    "X......XX....XX....XX......X",
+    "XXXXXX.XXXXX XX XXXXX.XXXXXX",
+    "     X.XX          XX.X     ",
+    "XXXXXX.XX XXXXXXXX XX.XXXXXX",
+    "X............XX............X",
+    "X.XXXX.XXXXX.XX.XXXXX.XXXX.X",
+    "X...XX.......P.......XX...OX",
+    "XXX.XX.XX.XXXXXXXX.XX.XX.XXX",
+    "X......XX....XX....XX......X",
+    "X.XXXXXXXXXX.XX.XXXXXXXXXX.X",
+    "X..........................X",
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+]
 
 # Barvy
-BLACK = (0, 0, 0)
-BLUE = (0, 0, 255)
+BLACK  = (0, 0, 0)
+WHITE  = (255, 255, 255)
 YELLOW = (255, 255, 0)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
+BLUE   = (0, 0, 255)
+RED    = (255, 0, 0)
 
-TILE_SIZE = 20
-COLS = 28
-ROWS = 31
-WIDTH = COLS * TILE_SIZE
-HEIGHT = ROWS * TILE_SIZE + 60
-
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Pekman")
-clock = pygame.time.Clock()
-font = pygame.font.SysFont("Arial", 24)
-
-# Bludiště (31 řádků)
-maze = [
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-[1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
-[1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
-[1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
-[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-[1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1],
-[1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1],
-[1,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,1],
-[1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1],
-[1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1],
-[1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1],
-[1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1],
-[1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1],
-[1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1],
-[1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1],
-[1,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,0,1],
-[1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1],
-[1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1],
-[1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1],
-[1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
-[1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
-[1,0,1,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,0,1],
-[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-]
-
-dots = [(x, y) for y in range(ROWS) for x in range(COLS) if maze[y][x] == 0]
-
-class Pekman:
+class Game:
     def __init__(self):
-        self.x = 14 * TILE_SIZE
-        self.y = 23 * TILE_SIZE
-        self.speed = 3
-        self.dir = (0, 0)
-        self.next_dir = (0, 0)
-        self.radius = TILE_SIZE // 2 - 2
-        self.mouth_angle = 0
+        pygame.init()
+        self.screen = pygame.display.set_mode((len(MAZE[0])*SIZE, len(MAZE)*SIZE + 50))
+        self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont("Arial", 20)
+        self.reset()
 
-    def update(self):
-        if self.next_dir != (0, 0):
-            nx = self.x + self.next_dir[0] * self.speed
-            ny = self.y + self.next_dir[1] * self.speed
-            if self.can_move(nx, ny):
-                self.dir = self.next_dir
+    def reset(self):
+        self.map = [list(row) for row in MAZE]
+        self.score = 0
+        self.lives = 3
+        self.state = "PLAY" # PLAY, WIN, DEAD
+        
+        # Najít startovní pozici Pacmana
+        for r in range(len(self.map)):
+            for c in range(len(self.map[r])):
+                if self.map[r][c] == 'P':
+                    self.pac_x, self.pac_y = c, r
+        
+        # Duchové (jednoduché seznamy místo tříd)
+        self.ghosts = [[1, 1], [26, 1], [1, 17]] 
 
-        new_x = self.x + self.dir[0] * self.speed
-        new_y = self.y + self.dir[1] * self.speed
+    def move_player(self, dx, dy):
+        # Kontrola, jestli tam není zeď
+        new_x = self.pac_x + dx
+        new_y = self.pac_y + dy
+        
+        if self.map[new_y][new_x] != 'X':
+            self.pac_x, self.pac_y = new_x, new_y
+            
+            # Snězení tečky
+            if self.map[self.pac_y][self.pac_x] == '.':
+                self.map[self.pac_y][self.pac_x] = ' '
+                self.score += 10
+            elif self.map[self.pac_y][self.pac_x] == 'O':
+                self.map[self.pac_y][self.pac_x] = ' '
+                self.score += 50
 
-        if self.can_move(new_x, new_y):
-            self.x = new_x
-            self.y = new_y
+    def move_ghosts(self):
+        for g in self.ghosts:
+            # Náhodný pohyb: zkusí náhodný směr, pokud tam není zeď
+            dirs = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+            random.shuffle(dirs)
+            for dx, dy in dirs:
+                if self.map[g[1]+dy][g[0]+dx] != 'X':
+                    g[0] += dx
+                    g[1] += dy
+                    break
 
-        # Tunely
-        if self.x < -TILE_SIZE: self.x = WIDTH
-        elif self.x > WIDTH: self.x = -TILE_SIZE
-
-    def can_move(self, new_x, new_y):
-        r = self.radius
-        positions = [(new_x-r, new_y-r), (new_x+r, new_y-r),
-                     (new_x-r, new_y+r), (new_x+r, new_y+r)]
-        for px, py in positions:
-            gx = int(px // TILE_SIZE)
-            gy = int(py // TILE_SIZE)
-            if not (0 <= gx < COLS and 0 <= gy < ROWS) or maze[gy][gx] == 1:
-                return False
-        return True
-
-    def draw(self):
-        self.mouth_angle = (self.mouth_angle + 8) % 40
-        angle = 30 + abs(self.mouth_angle - 20)
-
-        cx, cy = int(self.x), int(self.y)
-
-        if self.dir == (1, 0):    # vpravo
-            start, stop = angle, 360 - angle
-        elif self.dir == (-1, 0): # vlevo
-            start, stop = 180 + angle, 540 - angle
-        elif self.dir == (0, -1): # nahoru
-            start, stop = 270 + angle, 630 - angle
-        elif self.dir == (0, 1):  # dolů
-            start, stop = 90 + angle, 450 - angle
-        else:
-            start, stop = 0, 360
-
-        pygame.draw.circle(screen, YELLOW, (cx, cy), self.radius)
-        pygame.draw.arc(screen, BLACK,
-                        (cx - self.radius, cy - self.radius, self.radius*2, self.radius*2),
-                        math.radians(start), math.radians(stop), self.radius)   # ← opraveno
-
-class Ghost:
-    def __init__(self, color, x, y):
-        self.x = x * TILE_SIZE
-        self.y = y * TILE_SIZE
-        self.color = color
-        self.speed = 2
-        self.dir = random.choice([(1,0), (-1,0), (0,1), (0,-1)])
-
-    def update(self):
-        if random.random() < 0.05:
-            self.dir = random.choice([(1,0), (-1,0), (0,1), (0,-1)])
-        new_x = self.x + self.dir[0] * self.speed
-        new_y = self.y + self.dir[1] * self.speed
-        if self.can_move(new_x, new_y):
-            self.x = new_x
-            self.y = new_y
-
-    def can_move(self, new_x, new_y):
-        r = TILE_SIZE//2 - 4
-        for px, py in [(new_x-r,new_y-r),(new_x+r,new_y-r),(new_x-r,new_y+r),(new_x+r,new_y+r)]:
-            gx = int(px // TILE_SIZE)
-            gy = int(py // TILE_SIZE)
-            if not (0 <= gx < COLS and 0 <= gy < ROWS) or maze[gy][gx] == 1:
-                return False
-        return True
+    def check_collisions(self):
+        for g in self.ghosts:
+            if g[0] == self.pac_x and g[1] == self.pac_y:
+                self.lives -= 1
+                self.pac_x, self.pac_y = 14, 13 # Restart pozice
+                if self.lives <= 0:
+                    self.state = "DEAD"
 
     def draw(self):
-        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), TILE_SIZE//2 - 2)
-        pygame.draw.circle(screen, WHITE, (int(self.x)-6, int(self.y)-5), 5)
-        pygame.draw.circle(screen, WHITE, (int(self.x)+6, int(self.y)-5), 5)
-        pygame.draw.circle(screen, BLACK, (int(self.x)-6, int(self.y)-5), 2)
-        pygame.draw.circle(screen, BLACK, (int(self.x)+6, int(self.y)-5), 2)
+        self.screen.fill(BLACK)
+        
+        # 1. Vykreslení mapy
+        for r in range(len(self.map)):
+            for c in range(len(self.map[r])):
+                char = self.map[r][c]
+                px, py = c * SIZE, r * SIZE
+                
+                if char == 'X':
+                    pygame.draw.rect(self.screen, BLUE, (px+1, py+1, SIZE-2, SIZE-2), 1)
+                elif char == '.':
+                    pygame.draw.circle(self.screen, WHITE, (px+SIZE//2, py+SIZE//2), 2)
+                elif char == 'O':
+                    pygame.draw.circle(self.screen, WHITE, (px+SIZE//2, py+SIZE//2), 5)
 
-# Objekty
-player = Pekman()
-ghosts = [
-    Ghost(RED, 13, 11),
-    Ghost((255, 184, 255), 14, 11),
-    Ghost((0, 255, 255), 13, 12),
-    Ghost((255, 165, 0), 14, 12)
-]
+        # 2. Vykreslení Pacmana
+        pygame.draw.circle(self.screen, YELLOW, (self.pac_x*SIZE + SIZE//2, self.pac_y*SIZE + SIZE//2), SIZE//2 - 2)
 
-score = 0
-game_over = False
-win = False
+        # 3. Vykreslení duchů
+        for g in self.ghosts:
+            pygame.draw.rect(self.screen, RED, (g[0]*SIZE+4, g[1]*SIZE+4, SIZE-8, SIZE-8))
 
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:  player.next_dir = (1, 0)
-            elif event.key == pygame.K_LEFT: player.next_dir = (-1, 0)
-            elif event.key == pygame.K_UP:   player.next_dir = (0, -1)
-            elif event.key == pygame.K_DOWN: player.next_dir = (0, 1)
+        # 4. Texty a tabulka
+        score_text = self.font.render(f"Skóre: {self.score}  Životy: {self.lives}", True, WHITE)
+        self.screen.blit(score_text, (10, len(self.map)*SIZE + 10))
 
-    if not game_over and not win:
-        player.update()
+        if self.state != "PLAY":
+            # Tabulka výsledků
+            overlay = pygame.Surface((300, 150))
+            overlay.fill((50, 50, 50))
+            self.screen.blit(overlay, (100, 150))
+            
+            res_msg = "VYHRÁL JSI!" if self.state == "WIN" else "KONEC HRY"
+            msg = self.font.render(res_msg, True, YELLOW)
+            pts = self.font.render(f"Celkem bodů: {self.score}", True, WHITE)
+            restart = self.font.render("Stiskni R pro restart", True, WHITE)
+            
+            self.screen.blit(msg, (150, 170))
+            self.screen.blit(pts, (150, 200))
+            self.screen.blit(restart, (150, 240))
 
-        gx = int(player.x // TILE_SIZE)
-        gy = int(player.y // TILE_SIZE)
-        if (gx, gy) in dots:
-            dots.remove((gx, gy))
-            score += 10
+        pygame.display.flip()
 
-        for ghost in ghosts:
-            ghost.update()
-            if abs(player.x - ghost.x) < TILE_SIZE - 8 and abs(player.y - ghost.y) < TILE_SIZE - 8:
-                game_over = True
+    def run(self):
+        run = True
+        while run:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+            
+            if self.state == "PLAY":
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_LEFT]:  self.move_player(-1, 0)
+                if keys[pygame.K_RIGHT]: self.move_player(1, 0)
+                if keys[pygame.K_UP]:    self.move_player(0, -1)
+                if keys[pygame.K_DOWN]:  self.move_player(0, 1)
+                
+                self.move_ghosts()
+                self.check_collisions()
+                
+                # Kontrola výhry (žádné tečky)
+                dots = sum(row.count('.') for row in self.map)
+                if dots == 0: self.state = "WIN"
+            else:
+                if pygame.key.get_pressed()[pygame.K_r]:
+                    self.reset()
 
-        if len(dots) == 0:
-            win = True
+            self.draw()
+            self.clock.tick(FPS)
+        pygame.quit()
 
-    # Kreslení
-    screen.fill(BLACK)
-
-    for y in range(ROWS):
-        for x in range(COLS):
-            if maze[y][x] == 1:
-                pygame.draw.rect(screen, BLUE, (x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE))
-
-    for x, y in dots:
-        pygame.draw.circle(screen, WHITE, (x*TILE_SIZE + TILE_SIZE//2, y*TILE_SIZE + TILE_SIZE//2), 4)
-
-    player.draw()
-    for ghost in ghosts:
-        ghost.draw()
-
-    score_text = font.render(f"Skóre: {score}", True, WHITE)
-    screen.blit(score_text, (20, HEIGHT - 45))
-
-    if game_over:
-        txt = font.render("GAME OVER", True, RED)
-        screen.blit(txt, (WIDTH//2 - txt.get_width()//2, HEIGHT//2))
-    elif win:
-        txt = font.render("VYHRÁL JSI!!!", True, YELLOW)
-        screen.blit(txt, (WIDTH//2 - txt.get_width()//2, HEIGHT//2))
-
-    pygame.display.flip()
-    clock.tick(60)
-
-pygame.quit()
-sys.exit()
+if __name__ == "__main__":
+    Game().run()
