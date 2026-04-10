@@ -1,2 +1,6 @@
 # 1. kaukulačka, která bude sčítat, odčítat, dělit a násobit
 # 2. snake hra, pohyb hada s pojídáním jídla
+# 3. flappy, který se snaží nenarazit na trubky
+# 4. speed test, který ukazuje aktuální rychlost rychlost internetu
+# 5. pekman hra, která napodobuje originální
+# 6.star keeper, který se snaží nachytat co nejvíce hvězd
