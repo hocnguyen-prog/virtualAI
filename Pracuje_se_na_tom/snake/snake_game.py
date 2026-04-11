@@ -376,4 +376,6 @@ while True:
 
     pygame.display.flip()
     clock.tick(snake_speed)
-    
+    import pygame
+import time
+import random
