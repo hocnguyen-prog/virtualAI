@@ -1,133 +1,91 @@
-# prekladac
-import re
+import customtkinter as ctk
+from deep_translator import GoogleTranslator
+from datetime import datetime
 import os
-import sys
 
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
 
-def nacist_soubor(nazev_souboru):
-    """Načte obsah souboru."""
-    try:
-        with open(nazev_souboru, 'r', encoding='utf-8') as f:
-            return f.read()
-    except FileNotFoundError:
-        print(f"Chyba: Soubor '{nazev_souboru}' nebyl nalezen.")
-        return None
-    except Exception as e:
-        print(f"Chyba při čtení souboru: {e}")
-        return None
+class PrekladacApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
 
+        self.title("CZ-VN Překladač s Historií")
+        self.geometry("800x500") # Rozšířeno pro historii
 
-def zapsat_soubor(nazev_souboru, obsah):
-    """Zapíše obsah do souboru."""
-    try:
-        with open(nazev_souboru, 'w', encoding='utf-8') as f:
-            f.write(obsah)
-        print(f"Soubor '{nazev_souboru}' byl úspěšně uložen.")
-        return True
-    except Exception as e:
-        print(f"Chyba při zápisu do souboru: {e}")
-        return False
+        # Rozdělení na sloupce (Hlavní část a Historie)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
 
+        # --- LEVÝ PANEL (Překladač) ---
+        self.main_frame = ctk.CTkFrame(self)
+        self.main_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
 
-def prelozit_klicova_slova(kod):
-    """Překládá klíčová slova z čeština do ASCII."""
-    preklad_dict = {
-        r'\bkalkulačka\b': 'kalkulacka',
-        r'\bSčítání\b': 'Scitani',
-        r'\bOdčítání\b': 'Odcitani',
-        r'\bNásobení\b': 'Nasobeni',
-        r'\bDělení\b': 'Deleni',
-        r'\bVýsledek\b': 'Vysledek',
-        r'\bChyba\b': 'Chyba',
-        r'\bFunkce\b': 'Funkce',
-    }
-    
-    vysledek = kod
-    for ceske, ascii_verze in preklad_dict.items():
-        vysledek = re.sub(ceske, ascii_verze, vysledek)
-    
-    return vysledek
+        self.label = ctk.CTkLabel(self.main_frame, text="Překladač", font=("Arial", 20, "bold"))
+        self.label.pack(pady=10)
 
+        self.direction_var = ctk.StringVar(value="cs -> vi")
+        self.combo = ctk.CTkComboBox(self.main_frame, values=["cs -> vi", "vi -> cs"], variable=self.direction_var)
+        self.combo.pack(pady=5)
 
-def prelozit_znaky(kod):
-    """Překládá speciální znaky na ASCII ekvivalenty."""
-    znaky_dict = {
-        'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
-        'ů': 'u', 'ý': 'y', 'ř': 'r', 'š': 's', 'ž': 'z',
-        'č': 'c', 'ť': 't', 'ň': 'n', 'ď': 'd',
-        'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
-        'Ů': 'U', 'Ý': 'Y', 'Ř': 'R', 'Š': 'S', 'Ž': 'Z',
-        'Č': 'C', 'Ť': 'T', 'Ň': 'N', 'Ď': 'D',
-    }
-    
-    vysledek = kod
-    for cesky, ascii_char in znaky_dict.items():
-        vysledek = vysledek.replace(cesky, ascii_char)
-    
-    return vysledek
+        self.input_text = ctk.CTkTextbox(self.main_frame, height=100, width=300)
+        self.input_text.pack(pady=10)
 
+        self.btn = ctk.CTkButton(self.main_frame, text="Přeložit", command=self.prelozit)
+        self.btn.pack(pady=5)
 
-def prekladac(input_file, output_file):
-    """Hlavní funkce pro překlad souboru."""
-    kod = nacist_soubor(input_file)
-    
-    if kod is None:
-        return False
-    
-    # Aplikuj překlady
-    kod = prelozit_klicova_slova(kod)
-    kod = prelozit_znaky(kod)
-    
-    # Ulož výsledek
-    return zapsat_soubor(output_file, kod)
+        self.output_text = ctk.CTkTextbox(self.main_frame, height=100, width=300)
+        self.output_text.pack(pady=10)
 
+        # --- PRAVÝ PANEL (Historie) ---
+        self.history_frame = ctk.CTkFrame(self)
+        self.history_frame.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
 
-def statistika_prekladu(puvodni, prelozeny):
-    """Vypočítá statistiku překladu."""
-    puvodni_delka = len(puvodni)
-    prelozeny_delka = len(prelozeny)
-    rozdil = puvodni_delka - prelozeny_delka
-    
-    print(f"--- Statistika překladu ---")
-    print(f"Původní délka: {puvodni_delka} znaků")
-    print(f"Přeložená délka: {prelozeny_delka} znaků")
-    print(f"Rozdíl: {rozdil} znaků")
-    print(f"Změna: {(rozdil/puvodni_delka*100):.2f}%" if puvodni_delka > 0 else "N/A")
+        self.hist_label = ctk.CTkLabel(self.history_frame, text="Historie překladů", font=("Arial", 16))
+        self.hist_label.pack(pady=10)
 
+        self.history_box = ctk.CTkTextbox(self.history_frame, width=350)
+        self.history_box.pack(padx=10, pady=10, fill="both", expand=True)
+        
+        # Načtení historie ze souboru při startu
+        self.nacti_historii_ze_souboru()
 
-def validovat_soubor(nazev_souboru):
-    """Ověří, zda soubor existuje a je čitelný."""
-    if not os.path.exists(nazev_souboru):
-        print(f"Chyba: Soubor '{nazev_souboru}' neexistuje.")
-        return False
-    
-    if not os.path.isfile(nazev_souboru):
-        print(f"Chyba: '{nazev_souboru}' není soubor.")
-        return False
-    
-    return True
+    def uloz_do_historie(self, original, preklad, smer):
+        cas = datetime.now().strftime("%d.%m. %H:%M")
+        zaznam = f"[{cas}] ({smer}) {original} -> {preklad}\n"
+        
+        # Zápis do GUI
+        self.history_box.insert("0.0", zaznam)
+        
+        # Zápis do souboru .txt
+        with open("historie.txt", "a", encoding="utf-8") as f:
+            f.write(zaznam)
 
+    def nacti_historii_ze_souboru(self):
+        if os.path.exists("historie.txt"):
+            with open("historie.txt", "r", encoding="utf-8") as f:
+                obsah = f.read()
+                self.history_box.insert("1.0", obsah)
 
-def main():
-    """Hlavní funkce programu."""
-    if len(sys.argv) < 3:
-        print("Uso: python prekladac.py <vstupní_soubor> <výstupní_soubor>")
-        sys.exit(1)
-    
-    vstup = sys.argv[1]
-    vystup = sys.argv[2]
-    
-    if not validovat_soubor(vstup):
-        sys.exit(1)
-    
-    print(f"Překládám soubor '{vstup}' do '{vystup}'...")
-    if prekladac(vstup, vystup):
-        print("Překlad dokončen!")
-    else:
-        print("Překlad selhal.")
-        sys.exit(1)
+    def prelozit(self):
+        smer = self.direction_var.get()
+        src, tgt = smer.split(" -> ")
+        vstup = self.input_text.get("1.0", "end-1c").strip()
+        
+        if not vstup:
+            return
 
+        try:
+            preklad = GoogleTranslator(source=src, target=tgt).translate(vstup)
+            self.output_text.delete("1.0", "end")
+            self.output_text.insert("1.0", preklad)
+            
+            # Uložení
+            self.uloz_do_historie(vstup, preklad, smer)
+            
+        except Exception as e:
+            self.output_text.insert("1.0", f"Chyba: {e}")
 
 if __name__ == "__main__":
-    main()
-    
+    app = PrekladacApp()
+    app.mainloop()
