@@ -11,7 +11,7 @@ class ChessApp:
 
         self.board = chess.Board()
         self.selected_square = None
-        self.square_size = 70
+        self.square_size = 90
         self.highlighted_moves = []   # pro zvýraznění legálních tahů
         self.last_move = None         # poslední tah pro zvýraznění
         self.flip_board = False       # otočení desky
@@ -39,7 +39,7 @@ class ChessApp:
         self.captured_black_label.pack(pady=5)
 
         # Canvas pro šachovnici
-        self.canvas = tk.Canvas(main_frame, width=560, height=560, bg="#222")
+        self.canvas = tk.Canvas(main_frame, width=720, height=720, bg="#222")
         self.canvas.grid(row=0, column=1)
 
         # Levý panel - zajatá bílá
@@ -107,17 +107,17 @@ class ChessApp:
                 x1 = file * self.square_size
                 y1 = rank * self.square_size
                 color = colors[(file + rank) % 2]
-                self.canvas.create_rectangle(x1, y1, x1 + 70, y1 + 70, fill=color, outline="")
+                self.canvas.create_rectangle(x1, y1, x1 + 90, y1 + 90, fill=color, outline="")
 
                 # Souřadnice
                 if file == 0:
                     rank_label = str(rank + 1) if self.flip_board else str(8 - rank)
-                    self.canvas.create_text(x1 + 10, y1 + 10, text=rank_label,
-                                            font=("Arial", 10, "bold"), fill="#222")
+                    self.canvas.create_text(x1 + 12, y1 + 12, text=rank_label,
+                                            font=("Arial", 12, "bold"), fill="#222")
                 if rank == 7:
                     file_label = chr(97 + (7 - file)) if self.flip_board else chr(97 + file)
-                    self.canvas.create_text(x1 + 60, y1 + 60, text=file_label,
-                                            font=("Arial", 10, "bold"), fill="#222")
+                    self.canvas.create_text(x1 + 78, y1 + 78, text=file_label,
+                                            font=("Arial", 12, "bold"), fill="#222")
 
         # Zvýraznění posledního tahu (žluté)
         if self.last_move:
@@ -131,7 +131,7 @@ class ChessApp:
                     rank = 7 - rank
                 else:
                     rank = 7 - rank
-                self.canvas.create_rectangle(file*70+2, rank*70+2, file*70+68, rank*70+68,
+                self.canvas.create_rectangle(file*90+2, rank*90+2, file*90+88, rank*90+88,
                                              outline="#ffdd00", width=4)
 
         # Zvýraznění legálních tahů (zelené kruhy)
@@ -143,9 +143,9 @@ class ChessApp:
                 rank = 7 - rank
             else:
                 rank = 7 - rank
-            x = file * 70 + 35
-            y = rank * 70 + 35
-            self.canvas.create_oval(x - 12, y - 12, x + 12, y + 12, outline="#00ff44", width=4)
+            x = file * 90 + 45
+            y = rank * 90 + 45
+            self.canvas.create_oval(x - 15, y - 15, x + 15, y + 15, outline="#00ff44", width=4)
 
         # Figurky
         for sq in range(64):
@@ -159,14 +159,14 @@ class ChessApp:
                     rank = 7 - rank
                 else:
                     rank = 7 - rank
-                x = file * 70 + 35
-                y = rank * 70 + 35
+                x = file * 90 + 45
+                y = rank * 90 + 45
 
                 # Stín pro lepší čitelnost
-                self.canvas.create_text(x + 2, y + 2, text=symbol, font=("Arial", 48), fill="#111")
+                self.canvas.create_text(x + 2, y + 2, text=symbol, font=("Arial", 60), fill="#111")
                 # Bílé figurky - černá barva, černé figurky - tmavší barva
                 piece_color = "#000" if piece.color == chess.WHITE else "#333"
-                self.canvas.create_text(x, y, text=symbol, font=("Arial", 48), fill=piece_color)
+                self.canvas.create_text(x, y, text=symbol, font=("Arial", 60), fill=piece_color)
 
         # Zvýraznění vybraného pole
         if self.selected_square is not None:
@@ -177,7 +177,7 @@ class ChessApp:
                 rank = 7 - rank
             else:
                 rank = 7 - rank
-            self.canvas.create_rectangle(file*70, rank*70, file*70+70, rank*70+70,
+            self.canvas.create_rectangle(file*90, rank*90, file*90+90, rank*90+90,
                                          outline="#00ff00", width=6)
 
         self.update_status()
@@ -292,8 +292,8 @@ class ChessApp:
         if self.board.is_game_over():
             return
 
-        file = event.x // 70
-        rank = event.y // 70
+        file = event.x // 90
+        rank = event.y // 90
         if not (0 <= file < 8 and 0 <= rank < 8):
             return
 
@@ -319,8 +319,8 @@ class ChessApp:
         if self.selected_square is None:
             return
         
-        file = event.x // 70
-        rank = event.y // 70
+        file = event.x // 90
+        rank = event.y // 90
         if not (0 <= file < 8 and 0 <= rank < 8):
             return
         
@@ -331,14 +331,14 @@ class ChessApp:
         piece = self.board.piece_at(self.selected_square)
         if piece:
             symbol = self.pieces.get(piece.symbol(), "")
-            self.canvas.create_text(event.x, event.y, text=symbol, font=("Arial", 48), tags="drag")
+            self.canvas.create_text(event.x, event.y, text=symbol, font=("Arial", 60), tags="drag")
 
     def handle_release(self, event):
         if self.selected_square is None or self.board.is_game_over():
             return
 
-        file = event.x // 70
-        rank = event.y // 70
+        file = event.x // 90
+        rank = event.y // 90
         if not (0 <= file < 8 and 0 <= rank < 8):
             self.cancel_selection()
             return
