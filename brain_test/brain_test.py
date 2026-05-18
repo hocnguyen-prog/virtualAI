@@ -23,8 +23,8 @@ KNIHOVNA_OTAZEK: List[Dict] = [
     {
         "otazka": "Předběhneš posledního závodníka v běhu. Na jaké pozici teď jsi?",
         "moznosti": ["Předposlední", "Poslední", "Nelze ho předběhnout", "První"],
-        "spravna": 1,
-        "vysvetleni": "Jakmile ho předběhneš, už není poslední. Jsi tedy poslední ty! 🏃",
+        "spravna": 3,
+        "vysvetleni": "posledního nelze předběhnout nikdo za nim nemůže být! 🏃",
     },
     {
         "otazka": "Co má dvě hlavy, čtyři oči, šest nohou a jeden ocas?",
