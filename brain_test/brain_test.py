@@ -45,7 +45,7 @@ KNIHOVNA_OTAZEK: List[Dict] = [
         "vysvetleni": "Pátá dcera se jmenuje Maruška! 👧",
     },
     {
-        "otazka": "Co je těžší? Tona peří, nebo tona cihel?",
+        "otazka": "Co je těžší? Tuna peří, nebo tuna cihel?",
         "moznosti": ["Cihly", "Peří", "Obojí váží stejně", "Záleží na větru"],
         "spravna": 2,
         "vysvetleni": "Obojí váží přesně jednu tunu. ⚖️",
